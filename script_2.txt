@@ -1,0 +1,1 @@
+window.KAGGLE_JUPYTERLAB_PATH = "/static/assets/jupyterlab-v4/jupyterlab-index-cbd477e1edf0742c.html";

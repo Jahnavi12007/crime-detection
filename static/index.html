@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardianAI - Real-Time Surveillance & Crime Detection System</title>
+    <!-- Google Fonts: Outfit (headings) & Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-shield-halved logo-icon"></i>
+                    <span>Guardian<span class="logo-accent">AI</span></span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-target="live-feed-section">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                    <span>Live Monitor</span>
+                </a>
+                <a href="#" class="menu-item" data-target="forensic-section">
+                    <i class="fa-solid fa-file-video"></i>
+                    <span>Video Analyzer</span>
+                </a>
+                <a href="#" class="menu-item" data-target="analytics-section">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>System Analytics</span>
+                </a>
+                <a href="#" class="menu-item" data-target="settings-section">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="system-health">
+                    <div class="pulse-indicator green"></div>
+                    <span>Shield Engine: Active</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="page-title">Live Monitor</h1>
+                    <p class="text-muted">Real-time CCTV stream analysis and anomaly detection</p>
+                </div>
+                <div class="header-actions">
+                    <div class="alarm-toggle-container">
+                        <span class="alarm-label"><i class="fa-solid fa-volume-high"></i> Audio Alert</span>
+                        <label class="switch">
+                            <input type="checkbox" id="audio-alarm-switch" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="model-badge">
+                        <span class="status-dot green"></span>
+                        <span>MobileNetV2-Temporal-GRU</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Alarm Banner (Flashes Red when Crime detected) -->
+            <div class="alarm-banner" id="alarm-banner">
+                <div class="alarm-content">
+                    <i class="fa-solid fa-triangle-exclamation alarm-icon animate-flicker"></i>
+                    <div>
+                        <h4 id="alarm-title">CRITICAL VIOLENCE DETECTED</h4>
+                        <p id="alarm-desc">Camera 1 (Main Entrance) is reporting high-intensity anomaly score.</p>
+                    </div>
+                </div>
+                <button class="dismiss-alarm-btn" id="dismiss-alarm-btn">Acknowledge</button>
+            </div>
+
+            <!-- Page Sections -->
+            <!-- SECTION 1: LIVE MONITOR -->
+            <section id="live-feed-section" class="content-section active">
+                <!-- Top Counter Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon blue"><i class="fa-solid fa-video"></i></div>
+                        <div class="metric-data">
+                            <h3>4</h3>
+                            <p>Monitored Feeds</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon red"><i class="fa-solid fa-bell"></i></div>
+                        <div class="metric-data">
+                            <h3 id="stat-total-alerts">0</h3>
+                            <p>Threats Flagged</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon green"><i class="fa-solid fa-hourglass-half"></i></div>
+                        <div class="metric-data">
+                            <h3>1,582 hrs</h3>
+                            <p>Total Surveillance</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon purple"><i class="fa-solid fa-database"></i></div>
+                        <div class="metric-data">
+                            <h3 id="stat-feedback-size">0</h3>
+                            <p>Operator Feedback Logs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed and Live Graph Grid -->
+                <div class="dashboard-grid">
+                    <!-- Left: Camera Grid & Map View (Tabs) -->
+                    <div class="cctv-container card">
+                        <div class="card-header">
+                            <h2>CCTV Surveillance Feed</h2>
+                            <div class="view-tabs-container">
+                                <button class="tab-btn active" id="tab-btn-feeds"><i class="fa-solid fa-table-cells-large"></i> Live Grid</button>
+                                <button class="tab-btn" id="tab-btn-map"><i class="fa-solid fa-map-location-dot"></i> Facility Map</button>
+                            </div>
+                            <div class="camera-controls">
+                                <button class="btn btn-sm btn-outline active" id="btn-camera-webcam">
+                                    <i class="fa-solid fa-camera"></i> Webcam Feed
+                                </button>
+                                <button class="btn btn-sm btn-outline" id="btn-camera-simulation">
+                                    <i class="fa-solid fa-desktop"></i> Simulation Loop
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Live feeds grid -->
+                            <div class="camera-grid-view active" id="camera-grid-view">
+                                <div class="camera-grid">
+                                    <!-- CAM 01 (Active Webcam or Simulation Canvas) -->
+                                    <div class="camera-box active" id="cam-box-1" onclick="switchActiveCCTV('CAM-01')">
+                                        <div class="camera-feed-container">
+                                            <!-- Hidden Video element for Webcam -->
+                                            <video id="webcam-video" autoplay playsinline muted style="display: none;"></video>
+                                            <!-- Active Canvas to render prediction overlays -->
+                                            <canvas id="surveillance-canvas"></canvas>
+                                            <div class="camera-overlay">
+                                                <div class="camera-info">
+                                                    <span class="rec-dot animate-pulse"></span>
+                                                    <span id="active-feed-label">CAM-01 (Main Gate) - LIVE</span>
+                                                </div>
+                                                <div class="recording-clip-badge" id="recording-clip-badge" style="display: none;">
+                                                    <span class="rec-dot animate-pulse" style="background-color: var(--accent-red);"></span>
+                                                    <span id="recording-clip-timer">REC: 0s</span>
+                                                </div>
+                                                <div class="detection-badge" id="live-threat-badge">
+                                                    <span id="live-threat-label">Normal</span>
+                                                </div>
+                                            </div>
+                                            <div class="camera-watermark">
+                                                <p id="watermark-time">2026-07-02 14:12:00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- CAM 02 (Mock) -->
+                                    <div class="camera-box mock" id="cam-box-2" onclick="switchActiveCCTV('CAM-02')">
+                                        <div class="camera-feed-container">
+                                            <div class="mock-static">
+                                                <i class="fa-solid fa-video-slash"></i>
+                                                <span>CAM-02 (Lobby) - Standby</span>
+                                            </div>
+                                            <div class="camera-overlay">
+                                                <div class="camera-info">
+                                                    <span>CAM-02 (Lobby)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- CAM 03 (Mock) -->
+                                    <div class="camera-box mock" id="cam-box-3" onclick="switchActiveCCTV('CAM-03')">
+                                        <div class="camera-feed-container">
+                                            <div class="mock-static">
+                                                <i class="fa-solid fa-video-slash"></i>
+                                                <span>CAM-03 (Back Alley) - Standby</span>
+                                            </div>
+                                            <div class="camera-overlay">
+                                                <div class="camera-info">
+                                                    <span>CAM-03 (Back Alley)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- CAM 04 (Mock) -->
+                                    <div class="camera-box mock" id="cam-box-4" onclick="switchActiveCCTV('CAM-04')">
+                                        <div class="camera-feed-container">
+                                            <div class="mock-static">
+                                                <i class="fa-solid fa-video-slash"></i>
+                                                <span>CAM-04 (Parking Lot) - Standby</span>
+                                            </div>
+                                            <div class="camera-overlay">
+                                                <div class="camera-info">
+                                                    <span>CAM-04 (Parking Lot)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Facility Map View -->
+                            <div class="facility-map-view" id="facility-map-view" style="display: none;">
+                                <div class="map-layout">
+                                    <svg viewBox="0 0 800 400" class="facility-svg">
+                                        <!-- Floor outline -->
+                                        <rect x="20" y="20" width="760" height="360" rx="15" fill="none" stroke="#1e293b" stroke-width="3" />
+                                        
+                                        <!-- Rooms definitions -->
+                                        <!-- Main Gate Zone -->
+                                        <line x1="220" y1="20" x2="220" y2="380" stroke="#1e293b" stroke-width="2" stroke-dasharray="5 5" />
+                                        <text x="40" y="50" fill="#64748b" font-weight="bold" font-size="14">ZONE A: MAIN ACCESS</text>
+                                        
+                                        <!-- Lobby Zone -->
+                                        <line x1="480" y1="20" x2="480" y2="380" stroke="#1e293b" stroke-width="2" />
+                                        <text x="240" y="50" fill="#64748b" font-weight="bold" font-size="14">ZONE B: RECEPTION LOBBY</text>
+                                        
+                                        <!-- Alley and Loading Dock -->
+                                        <line x1="480" y1="200" x2="780" y2="200" stroke="#1e293b" stroke-width="2" />
+                                        <text x="500" y="50" fill="#64748b" font-weight="bold" font-size="14">ZONE C: BACK LOADING ALLEY</text>
+                                        <text x="500" y="230" fill="#64748b" font-weight="bold" font-size="14">ZONE D: PARKING LOT</text>
+                                        
+                                        <!-- Camera Node 1: Main Gate -->
+                                        <g class="camera-node" id="map-node-cam1" onclick="selectCameraFromMap('CAM-01')">
+                                            <circle cx="100" cy="200" r="18" class="node-circle bg-normal" />
+                                            <path d="M92,194 L108,194 L108,206 L92,206 Z M108,197 L114,192 L114,208 L108,203 Z" fill="#ffffff" />
+                                            <text x="100" y="235" text-anchor="middle" fill="#94a3b8" font-size="12">CAM-01 Gate</text>
+                                        </g>
+                                        
+                                        <!-- Camera Node 2: Lobby -->
+                                        <g class="camera-node" id="map-node-cam2" onclick="selectCameraFromMap('CAM-02')">
+                                            <circle cx="350" cy="180" r="18" class="node-circle bg-normal" />
+                                            <path d="M342,174 L358,174 L358,186 L342,186 Z M358,177 L364,172 L364,188 L358,183 Z" fill="#ffffff" />
+                                            <text x="350" y="215" text-anchor="middle" fill="#94a3b8" font-size="12">CAM-02 Lobby</text>
+                                        </g>
+                                        
+                                        <!-- Camera Node 3: Back Alley -->
+                                        <g class="camera-node" id="map-node-cam3" onclick="selectCameraFromMap('CAM-03')">
+                                            <circle cx="630" cy="100" r="18" class="node-circle bg-normal" />
+                                            <path d="M622,94 L638,94 L638,106 L622,106 Z M638,97 L644,92 L644,108 L638,103 Z" fill="#ffffff" />
+                                            <text x="630" y="135" text-anchor="middle" fill="#94a3b8" font-size="12">CAM-03 Alley</text>
+                                        </g>
+                                        
+                                        <!-- Camera Node 4: Parking Lot -->
+                                        <g class="camera-node" id="map-node-cam4" onclick="selectCameraFromMap('CAM-04')">
+                                            <circle cx="630" cy="300" r="18" class="node-circle bg-normal" />
+                                            <path d="M622,294 L638,294 L638,306 L622,306 Z M638,297 L644,292 L644,308 L638,303 Z" fill="#ffffff" />
+                                            <text x="630" y="335" text-anchor="middle" fill="#94a3b8" font-size="12">CAM-04 Park</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Active Threat Alert Queues (Tiered) -->
+                    <div class="active-threats-container card">
+                        <div class="card-header border-red">
+                            <h2>Active Threat Queues</h2>
+                        </div>
+                        <div class="card-body scroll-y">
+                            <!-- Queue 1: Immediate Action / Critical Queue -->
+                            <div class="queue-section" id="critical-queue">
+                                <h3 class="queue-heading critical"><i class="fa-solid fa-triangle-exclamation animate-flicker"></i> Critical Alerts (Weapons / Fighting)</h3>
+                                <div class="queue-list" id="critical-alert-list">
+                                    <!-- Rendered dynamically -->
+                                    <p class="empty-placeholder">No active critical alerts.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Queue 2: Review Queue (High / Medium) -->
+                            <div class="queue-section" id="review-queue">
+                                <h3 class="queue-heading review"><i class="fa-solid fa-eye"></i> Review Queue (Falls / Trespassing / Panic)</h3>
+                                <div class="queue-list" id="review-alert-list">
+                                    <!-- Rendered dynamically -->
+                                    <p class="empty-placeholder">No active alerts to review.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Telemetry Diagnostics and Logs Row -->
+                <div class="dashboard-grid-bottom">
+                    <!-- Left: Diagnostics -->
+                    <div class="diagnostics-container card">
+                        <div class="card-header">
+                            <h2>Telemetry & Threat Diagnostics</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="telemetry-grid">
+                                <div class="score-display">
+                                    <span class="score-label">Anomaly Index</span>
+                                    <div class="score-metric">
+                                        <span id="live-score-value">0.02</span>
+                                        <span class="score-max">/ 1.00</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" id="live-score-bar" style="width: 2%"></div>
+                                    </div>
+                                </div>
+                                <div class="score-display">
+                                    <span class="score-label">Pose Skeleton Deviation</span>
+                                    <div class="score-metric">
+                                        <span id="pose-score-value">0.02</span>
+                                        <span class="score-max">/ 1.00</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill bg-amber" id="pose-score-bar" style="width: 2%"></div>
+                                    </div>
+                                </div>
+                                <div class="score-display">
+                                    <span class="score-label">Audio Screams Intensity</span>
+                                    <div class="score-metric">
+                                        <span id="audio-score-value">0.02</span>
+                                        <span class="score-max">/ 1.00</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill bg-purple" id="audio-score-bar" style="width: 2%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="telemetry-chart-container" style="margin-top: 15px;">
+                                <canvas id="live-anomaly-chart"></canvas>
+                            </div>
+                            
+                            <div class="class-probabilities" style="margin-top: 15px;">
+                                <h3>Activity Classification</h3>
+                                <div class="prob-list" id="class-probabilities-list">
+                                    <!-- Rendered dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Feedback Loop Stats -->
+                    <div class="feedback-stats-card card">
+                        <div class="card-header">
+                            <h2>Feedback Loop Retraining Engine</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="feedback-metrics">
+                                <div class="feedback-metric">
+                                    <span class="num" id="fb-metric-handled">0</span>
+                                    <span class="lbl">Handled Alerts</span>
+                                </div>
+                                <div class="feedback-metric">
+                                    <span class="num text-green" id="fb-metric-confirmed">0</span>
+                                    <span class="lbl">Confirmed Threats</span>
+                                </div>
+                                <div class="feedback-metric">
+                                    <span class="num text-muted" id="fb-metric-dismissed">0</span>
+                                    <span class="lbl">Dismissed (False Positives)</span>
+                                </div>
+                            </div>
+                            <div class="feedback-progress">
+                                <div class="progress-label-container">
+                                    <span>Continuous Fine-Tuning Training Set Progress</span>
+                                    <span id="feedback-progress-txt">0 / 100 Samples</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill bg-green" id="feedback-progress-bar" style="width: 0%"></div>
+                                </div>
+                                <p class="text-muted text-small mt-2"><i class="fa-solid fa-circle-info"></i> Operators' confirm/dismiss responses automatically tag and crop frame sequences to build new training datasets in <code>data/operator_feedback.jsonl</code>, reducing future false alarms.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert History Log -->
+                <div class="alerts-log-card card">
+                    <div class="card-header">
+                        <h2>Threat Logs & Alert History</h2>
+                        <div class="filter-actions">
+                            <input type="text" id="log-search-input" placeholder="Search logs..." class="search-input">
+                            <select id="log-severity-filter" class="filter-select">
+                                <option value="ALL">All Severities</option>
+                                <option value="Critical">Critical Only</option>
+                                <option value="High">High Only</option>
+                                <option value="Medium">Medium Only</option>
+                                <option value="Low">Low Only</option>
+                            </select>
+                            <select id="log-status-filter" class="filter-select">
+                                <option value="ALL">All Statuses</option>
+                                <option value="Logged">Logged</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Dismissed">Dismissed</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline" id="btn-clear-alerts"><i class="fa-solid fa-trash-can"></i> Clear History</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="alert-table" id="alert-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Source</th>
+                                        <th>Location</th>
+                                        <th>Threat Type</th>
+                                        <th>Severity</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alert-table-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: FORENSIC VIDEO ANALYZER -->
+            <section id="forensic-section" class="content-section">
+                <div class="forensic-grid">
+                    <!-- Left Column: Video Player & Controls -->
+                    <div class="card forensic-player-card">
+                        <div class="card-header">
+                            <h2>Video Upload & Playback</h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- File Upload Area -->
+                            <div class="upload-area" id="drop-zone">
+                                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                <h3>Drag & Drop surveillance footage</h3>
+                                <p>Supports .mp4, .avi, .mkv up to 50MB</p>
+                                <div class="upload-btn-wrapper">
+                                    <button class="btn btn-primary">Browse File</button>
+                                    <input type="file" id="video-file-input" accept="video/*" />
+                                </div>
+                            </div>
+                            
+                            <!-- Uploading Status -->
+                            <div class="upload-status" id="upload-status" style="display: none;">
+                                <div class="spinner animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                                <div>
+                                    <h4 id="upload-status-title">Uploading Video...</h4>
+                                    <p id="upload-status-subtitle">Running deep learning frame classification pipelines</p>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" id="upload-progress-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Video Playback Container (hidden initially) -->
+                            <div class="video-playback-container" id="video-playback-container" style="display: none;">
+                                <video id="analyzed-video-player" controls preload="metadata"></video>
+                                <div class="video-analysis-overlay">
+                                    <span class="overlay-badge alert-level-badge" id="video-overlay-badge">Normal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Timeline & Highlights -->
+                    <div class="card forensic-timeline-card">
+                        <div class="card-header">
+                            <h2>Timeline & Incident Highlights</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline-instructions" id="timeline-instructions">
+                                <i class="fa-solid fa-chart-area"></i>
+                                <p>Upload a surveillance clip to generate a temporal anomaly timeline.</p>
+                            </div>
+                            
+                            <!-- Analysis Dashboard (hidden initially) -->
+                            <div class="analysis-results-container" id="analysis-results-container" style="display: none;">
+                                <div class="analysis-summary-metrics">
+                                    <div class="mini-metric">
+                                        <span class="label">Video Duration</span>
+                                        <span class="value" id="res-duration">0.0s</span>
+                                    </div>
+                                    <div class="mini-metric">
+                                        <span class="label">Max Anomaly Score</span>
+                                        <span class="value text-red" id="res-max-score">0.00</span>
+                                    </div>
+                                    <div class="mini-metric">
+                                        <span class="label">Anomalies Detected</span>
+                                        <span class="value text-amber" id="res-incidents-count">0</span>
+                                    </div>
+                                </div>
+
+                                <div class="video-timeline-chart-container">
+                                    <h3>Temporal Anomaly Plot</h3>
+                                    <p class="chart-subtitle">Click anywhere on the line to jump video playback to that timestamp</p>
+                                    <div class="chart-wrapper">
+                                        <canvas id="video-timeline-chart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="incident-highlights">
+                                    <h3>Detected Threats</h3>
+                                    <div class="incident-list" id="incident-list">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: SYSTEM ANALYTICS -->
+            <section id="analytics-section" class="content-section">
+                <div class="analytics-grid">
+                    <!-- Left: Weekly Trends -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Threat Trends (Past 7 Days)</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container-large">
+                                <canvas id="analytics-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Anomaly Distribution -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Anomaly Class Distribution</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container-large flex-center">
+                                <canvas id="analytics-dist-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: SETTINGS -->
+            <section id="settings-section" class="content-section">
+                <div class="settings-container card">
+                    <div class="card-header">
+                        <h2>System Configuration</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="settings-form" onsubmit="event.preventDefault();">
+                            <div class="settings-group">
+                                <h3>Detection Parameters</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="threshold-slider">Anomaly Threshold</label>
+                                        <span class="text-muted">Minimum confidence to trigger a red alert</span>
+                                    </div>
+                                    <div class="setting-input">
+                                        <input type="range" id="threshold-slider" min="0.1" max="0.9" step="0.05" value="0.50" />
+                                        <span class="slider-val" id="threshold-val">0.50</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="sample-fps-select">Inference Sampling Rate</label>
+                                        <span class="text-muted">FPS to capture and process from webcam</span>
+                                    </div>
+                                    <div class="setting-input">
+                                        <select id="sample-fps-select">
+                                            <option value="1">1 FPS (Resource Saving)</option>
+                                            <option value="2" selected>2 FPS (Standard)</option>
+                                            <option value="5">5 FPS (High Precision)</option>
+                                            <option value="10">10 FPS (Real-time Maximum)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-group">
+                                <h3>Alarms & Notifications</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="enable-sound-chk">Enable Alert Sound</label>
+                                        <span class="text-muted">Play a high-pitch warning siren on critical threat detection</span>
+                                    </div>
+                                    <div class="setting-input-check">
+                                        <input type="checkbox" id="enable-sound-chk" checked />
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="auto-record-chk">Auto-Record Incidents</label>
+                                        <span class="text-muted">Automatically save clips of anomalous activity to server logs</span>
+                                    </div>
+                                    <div class="setting-input-check">
+                                        <input type="checkbox" id="auto-record-chk" checked />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- DATA PRIVACY SETTINGS -->
+                            <div class="settings-group">
+                                <h3>Data Privacy & Compliance</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="privacy-face-blur">Real-time Face Blurring</label>
+                                        <span class="text-muted">Apply pixelated obfuscation overlay to faces in active CCTV feeds.</span>
+                                    </div>
+                                    <div class="setting-input-check">
+                                        <input type="checkbox" id="privacy-face-blur" checked />
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="privacy-anonymize">Anonymize Bystander Outlines</label>
+                                        <span class="text-muted">Mask surrounding non-target pedestrians with colored bounding frames.</span>
+                                    </div>
+                                    <div class="setting-input-check">
+                                        <input type="checkbox" id="privacy-anonymize" />
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="privacy-retention">Video Log Retention Limit</label>
+                                        <span class="text-muted">Number of days to store alert details before auto-purging.</span>
+                                    </div>
+                                    <div class="setting-input">
+                                        <select id="privacy-retention">
+                                            <option value="30" selected>30 Days</option>
+                                            <option value="90">90 Days</option>
+                                            <option value="180">180 Days</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3>Target Class Filters</h3>
+                                <p class="text-muted mb-4">Toggle which categories the model should alert on:</p>
+                                <div class="checkbox-grid" id="class-filter-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="settings-actions">
+                                <button class="btn btn-primary" id="btn-save-settings">Save Configurations</button>
+                                <button class="btn btn-outline" id="btn-reset-settings">Restore Defaults</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Audio alarm file -->
+    <audio id="siren-audio" src="https://assets.mixkit.co/active_storage/sfx/951/951-84.wav" preload="auto" loop></audio>
+    
+    <!-- Alert Clip Playback Modal -->
+    <div class="modal" id="clip-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="clip-modal-title">Recorded Incident Playback</h2>
+                <button class="close-modal-btn" id="close-clip-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <video id="clip-modal-player" controls autoplay style="width: 100%; border-radius: 8px; background: #000; max-height: 400px;"></video>
+                <div class="clip-metadata" id="clip-modal-metadata" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; font-size: 13px; color: var(--text-muted);">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="index.js"></script>
+</body>
+</html>
